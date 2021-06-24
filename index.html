@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Lower Game</title>
+    <style>
+        .hide-btn{
+            display: none;
+        }
+        .score  {
+            display: inline-block;
+        }
+        .card{
+            position: absolute;
+            left:  0;
+            top : 80px;
+            display: inline-block;
+            background: whitesmoke;
+            border: 1px #999 solid;
+            border-radius: 5px;
+            height: 120px;
+            width: 90px;
+            box-shadow: 0 2px 3px #777;
+        }
+        .big{
+            font-size: 3em;
+            text-align: center;
+            line-height: 40px;
+            margin: auto;
+            display: block;
+        }
+        .red{
+            color: red;
+        }
+        .tiny{
+            display: block;
+            font-size: 0.8em;
+            line-height: 8px;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+        <div>Streak : <div class="score">0</div></div>
+        <div class="message">Click to Start</div>
+        <div class="gameplay"></div>
+        <button type="button">Start</button>
+        <button type="button" class="hide-btn" >Higher</button>
+        <button type="button" class="hide-btn" >Lower</button>
+        <script>
+            const message = document.querySelector('.message');
+            const score = document.querySelector('.score');
+            const GamePlay = document.querySelector('.gameplay');
+            const button = document.querySelectorAll('button');
+
+            let curCardValue = 0;
+            let scoreValue = 0 ;
+            const deck = [];
+            let win;
+            const ranks = [2,3,4,5,6,7,8,9,10,'J','Q','K','A'];
+            const suits = ['hearts','diams','clubs','spades'];
+
+            function makeDeck(){
+                for(let i =0 ; i < ranks.length ; i++){
+                    for(let j = 0 ; j < suits.length ; j++){
+                        const card ={};
+                        card.value = i+1;
+                        card.suit = suits[j];
+                        card.rank = ranks[i];
+                        deck.push(card);
+                    }
+                }
+            }
+
+            function drawCard(){
+                if(deck.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * deck.length);
+                    let card = deck.splice(randomIndex,1)[0];
+                    return card;
+                }else{
+                    makeDeck();
+                    return drawCard();
+                }
+            }
+
+            function makeCards (card){
+
+                const cardInfo1 = card.rank + "<br>&"+card.suit +";" ;
+                const cardInfo2= card.rank + "&"+card.suit +";" ;
+                const curCards = document.querySelectorAll('.card');
+
+                const div = document.createElement('div');
+                div.setAttribute('class','card');
+                div.style.left = (curCards.length * 25) + 'px';
+                curCardValue = card.value ;
+                if(card.suit === 'hearts' || card.suit === 'diams'){
+                    div.classList.add('red');
+                }
+
+                const span1 = document.createElement('span');
+                span1.setAttribute('class','tiny');
+                span1.innerHTML = cardInfo2 ;
+                div.appendChild(span1);
+
+                const span2 = document.createElement('span');
+                span2.setAttribute('class','big');
+                span2.innerHTML = cardInfo1 ;
+                div.appendChild(span2);
+
+                GamePlay.appendChild(div);
+                
+            }
+
+            function toggleButton(){
+                button[0].classList.toggle('hide-btn');
+                button[1].classList.toggle('hide-btn');
+                button[2].classList.toggle('hide-btn');
+            }
+
+            function playGame(event){
+                let myCard = drawCard();
+                if(event.target.innerText === 'Start'){
+                    message.innerText = 'Higher or Lower '
+                    GamePlay.innerHTML  = '' ;
+                    makeCards(myCard);
+                    toggleButton();
+                    return;
+                }if(myCard.value == curCardValue){
+                    win = 'Draw'
+                    message.innerText = 'Draw';
+                }else{
+                    if((event.target.innerText === 'Higher' && (myCard.value > curCardValue)) || (event.target.innerText === 'Lower' && (myCard.value < curCardValue))){
+                        win =true ;
+                        scoreValue++;
+                        score.innerText = scoreValue ;
+                        message.innerText = 'Correct Next ?';
+                    }else{
+                        scoreValue = 0
+                        message.innerText = 'Wrong Game Over';
+                        toggleButton();
+                    }
+                }
+                makeCards(myCard);
+            }
+
+            for (let i = 0 ; i < button.length;i++){
+                button[i].addEventListener('click',playGame)
+            }
+
+        </script>
+</body>
+
+</html>
